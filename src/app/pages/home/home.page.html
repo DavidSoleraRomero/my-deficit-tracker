@@ -1,29 +1,31 @@
-<ion-header class="bg-primary text-white">
-  <ion-toolbar class="bg-primary">
-    <ion-title>My Deficit Tracker</ion-title>
-    <ion-buttons slot="end" shape="round">
-      <ion-button color="light" (click)="showUserDataModal()">
-        <ion-icon color="secondary" name="person-circle-outline" slot="icon-only" class="ion-no-margin ion-no-padding"></ion-icon>      
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true" class="min-h-screen">
+<ion-content [fullscreen]="true"  class="min-h-screen relative">
   <app-home-background-logo></app-home-background-logo>
+  <div class="fixed bottom-2.5 right-5 flex flex-col gap-3 rounded-full">
+    <ion-button color="primary" (click)="showUserDataModal()" class="shadow-lg button-round">
+      <ion-icon name="person-circle-outline" slot="icon-only" size="large"></ion-icon>
+    </ion-button>
+  </div>
   <!-- Form for adding calorie entry -->
-  <div class="p-2 sm:p-5">
-    <div class="flex flex-col gap-4 lg:flex-row lg:gap-8">
+  <div class="p-2 sm:p-5 mt-5 md:mt-2">
+    <div class="flex flex-col gap-4 lg:flex-row lg:gap-8 mt-3 mx-1 sm:m-0">
       <div class="flex flex-col bg-opacity-20 backdrop-blur-lg border-primary border p-5 rounded-lg w-full lg:w-4/5 min-h-[150px] justify-center items-center">
-        <h2 class="text-xl md:text-3xl font-semibold text-secondary mb-4 mt-4 sm:mt-0">My Deficit Tracker</h2>
-        <ion-input class="my-2 rounded-lg" label="Alimento que ingeriste" label-placement="floating" fill="outline" [(ngModel)]="newFood" placeholder="Ingrese el nombre del alimento"></ion-input>
+        <h2 class="text-xl md:text-3xl font-semibold text-secondary mb-4 sm:mt-0">My Deficit Tracker</h2>
+        <ion-input class="my-2 rounded-lg" label="Alimento ingerido" label-placement="floating" fill="outline" [(ngModel)]="newFood" placeholder="Ingrese el nombre del alimento"></ion-input>
         <ion-input class="my-2 rounded-lg" label="Calorías del alimento" label-placement="floating" fill="outline" type="number" [(ngModel)]="newCalories" placeholder="Ingrese las calorías aproximadas del alimento"></ion-input>
         <ion-button expand="block" color="primary" (click)="addCalorieEntry()" class="text-decoration-none button-round w-full mb-2 mt-3">
           <span class="text-white font-semibold text-base py-2.5">
-            Agregar alimento
+            Añadir calorías ingeridas
+          </span>
+        </ion-button>
+        <ion-input class="my-2 rounded-lg" label="Actividad realizada (opcional)" label-placement="floating" fill="outline" [(ngModel)]="activityName" placeholder="Ingrese el nombre de la actividad realizada"></ion-input>
+        <ion-input class="my-2 rounded-lg" label="Calorías aproximadas perdidas (opcional)" label-placement="floating" fill="outline" type="number" [(ngModel)]="exerciseCalories" placeholder="Ingrese las calorías aproximadas perdidas hoy"></ion-input>
+        <ion-button expand="block" color="primary" (click)="addExerciseEntry()" class="text-decoration-none button-round w-full mb-2 mt-3">
+          <span class="text-white font-semibold text-base py-2.5">
+            Añadir calorías perdidas
           </span>
         </ion-button>
       </div>
+      
       
     
       <!-- Calories consumed today (on the right) -->
@@ -31,11 +33,13 @@
         <div class="bg-opacity-20 backdrop-blur-lg border-primary border shadow-lg rounded-lg p-3 sm:p-5 mx-auto w-full">
           <h2 class="text-sm sm:text-xl font-bold text-wrap">Tu TMB</h2>
           <p class="text-base sm:text-2xl font-semibold text-primary">{{ getUserBmr() | number:'1.0-0' }} kcal</p>
+          <h2 class="text-sm sm:text-xl font-bold text-wrap mt-2">Actividad realizada hoy</h2>
+          <p class="text-base sm:text-2xl font-semibold text-primary">{{ getActivityDone() }} kcal</p>
           <h2 class="text-sm sm:text-xl font-bold text-wrap mt-2">Calorías restantes</h2>
-          <p class="text-base sm:text-2xl font-semibold text-primary">{{ getRemainingCalories(getUserBmr(), getTodaysCalories()) | number:'1.0-0' }} kcal</p>
-          <h2 class="text-sm sm:text-xl font-bold text-wrap mt-2">Calorías ingeridas</h2>
+          <p class="text-base sm:text-2xl font-semibold text-primary">{{ getRemainingCalories(getUserBmr(), getTodaysCalories()) + getActivityDone() | number:'1.0-0' }} kcal</p>
+          <h2 class="text-sm sm:text-xl font-bold text-wrap mt-2">Calorías ingeridas hoy</h2>
           <p class="text-base sm:text-2xl font-semibold text-primary">{{ getTodaysCalories() }} kcal</p>
-          <h2 class="text-sm sm:text-xl font-bold text-wrap mt-2">Peso perdido</h2>
+          <h2 class="text-sm sm:text-xl font-bold text-wrap mt-2">Peso total perdido</h2>
           <p class="text-base sm:text-2xl font-semibold text-primary">{{ getTotalWeightLost() | number:'1.0-3' }} kgs</p>
         </div>
       </div>
@@ -43,7 +47,7 @@
 
     <!-- Today's Record -->
     <div class="mt-6">
-      <h2 class="text-xl font-bold mb-2 ml-1">Registro de hoy</h2>
+      <h2 class="text-xl font-bold mb-2 ml-1">Registro de calorías</h2>
       <!-- List of calorie entries with food, calories, and time -->
       <div *ngIf="todayRecord?.entries.length > 0" class="w-full space-y-3">
         <div *ngFor="let entry of todayRecord?.entries; let i = index" class="w-full bg-opacity-20 backdrop-blur-lg border-primary border shadow-lg rounded-lg p-3 sm:p-5 mx-auto">
@@ -55,7 +59,20 @@
       </div>
       
       <!-- If no entries are present, show a message -->
-      <p *ngIf="!todayRecord || todayRecord?.entries.length === 0" class="ml-1">No hay registros aún</p>
+      <p *ngIf="!todayRecord || !todayRecord.entries" class="ml-1">No hay registros aún</p>
+    </div>
+
+    <div class="mt-6">
+      <h2 class="text-xl font-bold mb-2 ml-1">Registro de actividad</h2>
+      <div *ngIf="todayRecord?.exerciseEntries?.length > 0" class="w-full space-y-3">
+        <div *ngFor="let entry of todayRecord?.exerciseEntries; let i = index" class="w-full bg-opacity-20 backdrop-blur-lg border-primary border shadow-lg rounded-lg p-3 sm:p-5 mx-auto">
+          <div class="flex justify-between items-center w-full">
+            <span class="text-base sm:text-xl font-semibold">{{ entry.calories }} kcal - {{ entry.activity }}</span>
+            <ion-button slot="end" color="danger" (click)="deleteExerciseEntry(i)">X</ion-button>
+          </div>
+        </div>
+      </div>
+      <p *ngIf="!todayRecord || !todayRecord?.exerciseEntries || todayRecord?.exerciseEntries?.length === 0" class="ml-1">No hay registros aún</p>
     </div>
 
     <!-- Historical Calories Records -->
@@ -82,6 +99,7 @@
       </div>
       <p *ngIf="!historicalRecords || historicalRecords?.length == 0" class="ml-1">No hay registros aún</p>
     </div>
+
 
   </div>
 </ion-content>

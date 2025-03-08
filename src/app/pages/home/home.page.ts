@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Preferences } from '@capacitor/preferences';
 import { AlertController, ModalController } from '@ionic/angular';
-import { CalorieEntry } from 'src/app/interfaces/daily-record.interface';
+import { CalorieEntry, ExerciseEntry } from 'src/app/interfaces/daily-record.interface';
 import { UserProfile } from 'src/app/interfaces/user-profile.interface';
 import { UserDataModalComponent } from 'src/app/modals/user-data-modal/user-data-modal.component';
 import { RecordService } from 'src/app/services/record.service';
@@ -17,8 +17,13 @@ export class HomePage implements OnInit {
   today: string = new Date().toISOString().split('T')[0];
   todayRecord: any = null;
   historicalRecords: any = [];
+
   newFood: string = '';
   newCalories: any = undefined;
+
+  activityName: string = '';
+  exerciseCalories: any = undefined;
+  
   userProfile: any;
 
   constructor(
@@ -37,11 +42,16 @@ export class HomePage implements OnInit {
   getTotalWeightLost(): number {
     try {
       const totalDeficit = this.historicalRecords?.reduce((sum: any, record: any) => {
-        const deficit = record.bmr - this.getTotalCaloriesFromEntries(record.entries);
-        return sum + (deficit > 0 ? deficit : 0); 
+        const deficitSurplus = record.bmr - this.getTotalCaloriesFromEntries(record.entries);
+        return sum + deficitSurplus;
+      }, 0);
+
+      const totalActivity = this.historicalRecords?.reduce((sum: any, record: any) => {
+        const activity = record.exerciseEntries?.reduce((a: number, b: any) => a + b.calories, 0) || 0;
+        return sum + activity;
       }, 0);
     
-      return Math.max(0, totalDeficit / 7350); 
+      return Math.max(0, (totalDeficit + totalActivity) / 7350); 
     } catch (_: any) {
       return 0;
     }
@@ -49,6 +59,10 @@ export class HomePage implements OnInit {
   
   getUserBmr() {
     return this.recordService.calculateBMR(this.userProfile);
+  }
+
+  getActivityDone() {
+    return this.todayRecord?.exerciseEntries?.reduce((a: number, b: any) => a + b.calories, 0) || 0;
   }
 
   async checkUserData() {
@@ -101,6 +115,37 @@ export class HomePage implements OnInit {
     } 
   }
 
+  async addExerciseEntry() {
+    if (this.activityName != '' &&  this.exerciseCalories > 0) {
+      let exerciseEntries = this.todayRecord?.exercise || [];
+  
+      const newExerciseEntry: ExerciseEntry = {
+        activity: this.activityName,  
+        calories: this.exerciseCalories,
+      };
+  
+      exerciseEntries.push(newExerciseEntry);
+  
+      let bmr = this.todayRecord?.bmr;
+  
+      if (!bmr) {
+        const profile = await this.recordService.getUserProfile();
+        if (profile) {
+          bmr = this.recordService.calculateBMR(profile);
+        }
+      }
+  
+      await this.recordService.saveOrUpdateRecord(this.todayRecord?.entries || [], bmr, exerciseEntries);
+      this.todayRecord = await this.recordService.getTodayRecord();
+  
+      this.activityName = '';
+      this.exerciseCalories = undefined;
+  
+      this.historicalRecords = await this.recordService.getAllRecords();
+    }
+  }
+  
+
   async deleteCalorieEntry(index: number) {
     const entry = this.todayRecord.entries[index];
     const alert = await this.alertController.create({
@@ -125,6 +170,35 @@ export class HomePage implements OnInit {
   
     await alert.present();
   }
+
+  async deleteExerciseEntry(index: number) {
+    const entry = this.todayRecord?.exerciseEntries[index];
+    const alert = await this.alertController.create({
+      header: 'Confirmar eliminación',
+      message: `¿Estás seguro de que deseas eliminar la actividad "${entry?.activity}" con ${entry?.caloriesBurned} kcal quemadas?`,
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {}
+        },
+        {
+          text: 'Eliminar',
+          handler: async () => {
+            this.todayRecord.exerciseEntries.splice(index, 1);
+            await this.recordService.saveOrUpdateRecord(
+              this.todayRecord.entries,
+              this.todayRecord.bmr,
+              this.todayRecord.exerciseEntries
+            );
+            this.historicalRecords = await this.recordService.getAllRecords();
+          }
+        }
+      ]
+    });
+  
+    await alert.present();
+  }  
   
   getTodaysCalories() {
     return (this.todayRecord?.entries) ?

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Preferences } from '@capacitor/preferences';
-import { CalorieEntry, DailyRecord } from '../interfaces/daily-record.interface';
+import { CalorieEntry, DailyRecord, ExerciseEntry } from '../interfaces/daily-record.interface';
 import { UserProfile } from '../interfaces/user-profile.interface';
 
 @Injectable({
@@ -16,10 +16,10 @@ export class RecordService {
   async saveOrUpdateRecord(
     entries: CalorieEntry[],
     bmr?: number,
-    caloriesLost?: number
+    exerciseEntries?: ExerciseEntry[]
   ): Promise<void> {
     const today = this.getTodayDate();
-    const record: DailyRecord = { date: today, entries, bmr, caloriesLost };
+    const record: DailyRecord = { date: today, entries, bmr, exerciseEntries };
     await Preferences.set({ key: today, value: JSON.stringify(record) });
 
     const { value } = await Preferences.get({ key: 'dates' });
