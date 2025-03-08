@@ -7,7 +7,7 @@ My Deficit Tracker es una aplicación móvil desarrollada con **Ionic**, **Angul
 - **🍽️ Registro de alimentos:** Ingresa alimentos junto con sus calorías.
 - **🔥 Cálculo de la tasa metabólica basal (TMB):** Estima tu gasto calórico en reposo.
 - **📊 Balance calórico diario:** Muestra las calorías ingeridas y calcula el déficit calórico.
-- **📉 Estimación del peso perdido:** Estima el peso perdido basándose en el déficit calórico acumulado (1 kg ≈ 7.000 kcal).
+- **📉 Estimación del peso perdido:** Estima el peso perdido basándose en el déficit calórico acumulado.
 - **🗓️ Historial de días anteriores:** Los días pasados son solo visibles, no editables.
 - **📝 Añadir y borrar solo el día actual:** Los registros del día actual son los únicos editables.
 
