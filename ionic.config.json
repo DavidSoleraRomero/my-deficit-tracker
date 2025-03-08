@@ -1,0 +1,7 @@
+{
+  "name": "my-deficit-tracker",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

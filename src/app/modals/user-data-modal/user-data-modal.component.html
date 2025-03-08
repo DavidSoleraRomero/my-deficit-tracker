@@ -1,0 +1,66 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Introduce tus datos</ion-title>
+    <ion-buttons *ngIf="mode === 'edit'" slot="end" shape="round">
+      <ion-button color="light" (click)="dismiss()">
+        <ion-icon color="secondary" name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <app-background-logo></app-background-logo>
+  <div class="ion-padding h-full">
+    <div class="p-4 rounded-lg backdrop-blur-lg bg-opacity-20 border-primary border h-full">
+      <h2 class="text-center text-2xl font-semibold mt-3 mb-6">Tus datos</h2>
+      <ion-input 
+        type="number" 
+        [value]="age" 
+        (ionChange)="updateAge($event)" 
+        label="Edad"
+        placeholder="Ingresa tu edad" 
+        fill="outline" 
+        label-placement="floating"
+        class="my-3 rounded-lg">
+      </ion-input>
+      
+      <ion-input 
+        type="number" 
+        [value]="weight" 
+        (ionChange)="updateWeight($event)" 
+        label="Peso"
+        placeholder="Ingresa tu peso"
+        fill="outline" 
+        label-placement="floating"
+        class="my-3 rounded-lg">
+      </ion-input>
+      
+      <ion-input 
+        type="number" 
+        [value]="height" 
+        (ionChange)="updateHeight($event)" 
+        label="Estatura"
+        placeholder="Ingresa tu estatura en cm"
+        fill="outline" 
+        label-placement="floating"
+        class="my-3 rounded-lg">
+      </ion-input>
+      
+      <ion-item>
+        <ion-select aria-label="fruit" [value]="gender" (ionChange)="updateGender($event)" interface="alert" placeholder="Selecciona tu género">
+          <div slot="label">Género</div>
+          <ion-select-option value="Masculino">Masculino</ion-select-option>
+          <ion-select-option value="Femenino">Femenino</ion-select-option>
+        </ion-select>
+      </ion-item>
+    
+      <ion-button expand="full" color="primary" (click)="submitData()" class="text-decoration-none button-round mt-5">
+        <span class="text-white font-semibold text-base py-2.5">
+          Guardar
+        </span>
+      </ion-button>
+    </div>
+    
+  </div>
+</ion-content>
