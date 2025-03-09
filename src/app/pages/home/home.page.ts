@@ -97,12 +97,9 @@ export class HomePage implements OnInit {
       entries.push(newEntry);
   
       let bmr = this.todayRecord?.bmr;
-  
-      if (!bmr) {
-        const profile = await this.recordService.getUserProfile();
-        if (profile) {
-          bmr = this.recordService.calculateBMR(profile);
-        }
+      const profile = await this.recordService.getUserProfile();
+      if (profile) {
+        bmr = this.recordService.calculateBMR(profile);
       }
   
       await this.recordService.saveOrUpdateRecord(entries, bmr);
@@ -213,17 +210,24 @@ export class HomePage implements OnInit {
     return bmr - consumedCalories;
   }
 
-  getWeightChangeStatus(bmr: number, consumedCalories: number): string {
-    const remainingCalories = this.getRemainingCalories(bmr, consumedCalories);
+  getWeightChangeStatus(bmr: number, consumedCalories: number, exerciseEntries?: ExerciseEntry[]): string {
+    let remainingCalories = this.getRemainingCalories(bmr, consumedCalories);
+    if (exerciseEntries?.length) {
+      remainingCalories += exerciseEntries.reduce((sum, entry) => sum + entry.calories, 0);
+    }
     const roundedRemainingCalories = Math.round(remainingCalories); 
     
     if (roundedRemainingCalories < 0) {
-      return `Ganaste ${Math.abs(roundedRemainingCalories)} kcal`;
+      return `Superávit - ${Math.abs(roundedRemainingCalories)} kcal`;
     } else if (roundedRemainingCalories > 0) {
-      return `Perdiste ${roundedRemainingCalories} kcal`;
+      return `Déficit - ${roundedRemainingCalories} kcal`;
     } else {
       return `Mantuviste tu peso`;
     }
+  }
+
+  getActivityFromEntries(entries: ExerciseEntry[]) {
+    return entries?.reduce((a: number, b: any) => a + b.calories, 0) ?? 0;
   }
   
 }

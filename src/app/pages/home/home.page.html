@@ -12,22 +12,20 @@
         <h2 class="text-xl md:text-3xl font-semibold text-secondary mb-4 sm:mt-0">My Deficit Tracker</h2>
         <ion-input class="my-2 rounded-lg" label="Alimento ingerido" label-placement="floating" fill="outline" [(ngModel)]="newFood" placeholder="Ingrese el nombre del alimento"></ion-input>
         <ion-input class="my-2 rounded-lg" label="Calorías del alimento" label-placement="floating" fill="outline" type="number" [(ngModel)]="newCalories" placeholder="Ingrese las calorías aproximadas del alimento"></ion-input>
-        <ion-button expand="block" color="primary" (click)="addCalorieEntry()" class="text-decoration-none button-round w-full mb-2 mt-3">
+        <ion-button [disabled]="newFood === '' || newCalories <= 0" expand="block" color="primary" (click)="addCalorieEntry()" class="text-decoration-none button-round w-full mb-2 mt-3">
           <span class="text-white font-semibold text-base py-2.5">
             Añadir calorías ingeridas
           </span>
         </ion-button>
         <ion-input class="my-2 rounded-lg" label="Actividad realizada (opcional)" label-placement="floating" fill="outline" [(ngModel)]="activityName" placeholder="Ingrese el nombre de la actividad realizada"></ion-input>
         <ion-input class="my-2 rounded-lg" label="Calorías aproximadas perdidas (opcional)" label-placement="floating" fill="outline" type="number" [(ngModel)]="exerciseCalories" placeholder="Ingrese las calorías aproximadas perdidas hoy"></ion-input>
-        <ion-button expand="block" color="primary" (click)="addExerciseEntry()" class="text-decoration-none button-round w-full mb-2 mt-3">
+        <ion-button [disabled]="activityName === '' || exerciseCalories <= 0" expand="block" color="primary" (click)="addExerciseEntry()" class="text-decoration-none button-round w-full mb-2 mt-3">
           <span class="text-white font-semibold text-base py-2.5">
             Añadir calorías perdidas
           </span>
         </ion-button>
       </div>
       
-      
-    
       <!-- Calories consumed today (on the right) -->
       <div class="lg:mt-0 lg:w-1/5 flex flex-col justify-center items-center">
         <div class="bg-opacity-20 backdrop-blur-lg border-primary border shadow-lg rounded-lg p-3 sm:p-5 mx-auto w-full">
@@ -82,16 +80,17 @@
         <div *ngFor="let record of historicalRecords">
           <div class="bg-opacity-20 backdrop-blur-lg border-primary border shadow-lg rounded-lg p-4">
             <h3 class="text-base font-semibold">{{ record.date }}</h3>
-            <p class="text-base font-semibold text-secondary">Quemadas - {{ record.bmr | number:'1.0-0' }} kcal</p>
+            <p class="text-base font-semibold text-secondary">Quemadas - {{ record.bmr + getActivityFromEntries(record.exerciseEntries) | number:'1.0-0' }} kcal</p>
+            <p class="text-base font-semibold text-secondary">Actividades - {{ getActivityFromEntries(record.exerciseEntries) }} kcal</p>
             <p class="text-base font-semibold text-secondary">Consumidas - {{ getTotalCaloriesFromEntries(record.entries) }} kcal</p>
             <p class="text-lg font-bold">
               <span [ngClass]="{
                 'text-green-400': 
-                  getWeightChangeStatus(record.bmr, getTotalCaloriesFromEntries(record.entries)).includes('Perdiste') || 
-                  getWeightChangeStatus(record.bmr, getTotalCaloriesFromEntries(record.entries)) === 'Mantuviste tu peso',
-                'text-red-400': getWeightChangeStatus(record.bmr, getTotalCaloriesFromEntries(record.entries)).includes('Ganaste'),
+                  getWeightChangeStatus(record.bmr, getTotalCaloriesFromEntries(record.entries), record.exerciseEntries).includes('Déficit') || 
+                  getWeightChangeStatus(record.bmr, getTotalCaloriesFromEntries(record.entries), record.exerciseEntries) === 'Mantuviste tu peso',
+                'text-red-400': getWeightChangeStatus(record.bmr, getTotalCaloriesFromEntries(record.entries), record.exerciseEntries).includes('Superávit'),
               }">
-                {{ getWeightChangeStatus(record.bmr, getTotalCaloriesFromEntries(record.entries)) }}
+                {{ getWeightChangeStatus(record.bmr, getTotalCaloriesFromEntries(record.entries), record.exerciseEntries) }}
               </span>
             </p>
           </div>
