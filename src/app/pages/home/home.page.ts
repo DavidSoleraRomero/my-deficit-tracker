@@ -101,8 +101,10 @@ export class HomePage implements OnInit {
       if (profile) {
         bmr = this.recordService.calculateBMR(profile);
       }
+
+      let exerciseEntries = this.todayRecord?.exerciseEntries || [];
   
-      await this.recordService.saveOrUpdateRecord(entries, bmr);
+      await this.recordService.saveOrUpdateRecord(entries, bmr, exerciseEntries);
       this.todayRecord = await this.recordService.getTodayRecord();
   
       this.newFood = '';
