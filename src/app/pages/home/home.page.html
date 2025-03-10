@@ -12,14 +12,14 @@
         <h2 class="text-xl md:text-3xl font-semibold text-secondary mb-4 sm:mt-0">My Deficit Tracker</h2>
         <ion-input class="my-2 rounded-lg" label="Alimento ingerido" label-placement="floating" fill="outline" [(ngModel)]="newFood" placeholder="Ingrese el nombre del alimento"></ion-input>
         <ion-input class="my-2 rounded-lg" label="Calorías del alimento" label-placement="floating" fill="outline" type="number" [(ngModel)]="newCalories" placeholder="Ingrese las calorías aproximadas del alimento"></ion-input>
-        <ion-button [disabled]="newFood === '' || newCalories <= 0" expand="block" color="primary" (click)="addCalorieEntry()" class="text-decoration-none button-round w-full mb-2 mt-3">
+        <ion-button [disabled]="newFood === '' || newCalories <= 0 || newCalories == undefined" expand="block" color="primary" (click)="addCalorieEntry()" class="text-decoration-none button-round w-full mb-2 mt-3">
           <span class="text-white font-semibold text-base py-2.5">
             Añadir calorías ingeridas
           </span>
         </ion-button>
         <ion-input class="my-2 rounded-lg" label="Actividad realizada (opcional)" label-placement="floating" fill="outline" [(ngModel)]="activityName" placeholder="Ingrese el nombre de la actividad realizada"></ion-input>
         <ion-input class="my-2 rounded-lg" label="Calorías aproximadas perdidas (opcional)" label-placement="floating" fill="outline" type="number" [(ngModel)]="exerciseCalories" placeholder="Ingrese las calorías aproximadas perdidas hoy"></ion-input>
-        <ion-button [disabled]="activityName === '' || exerciseCalories <= 0" expand="block" color="primary" (click)="addExerciseEntry()" class="text-decoration-none button-round w-full mb-2 mt-3">
+        <ion-button [disabled]="activityName === '' || exerciseCalories <= 0 || exerciseCalories == undefined" expand="block" color="primary" (click)="addExerciseEntry()" class="text-decoration-none button-round w-full mb-2 mt-3">
           <span class="text-white font-semibold text-base py-2.5">
             Añadir calorías perdidas
           </span>
